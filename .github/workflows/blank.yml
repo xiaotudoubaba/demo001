@@ -74,6 +74,7 @@ jobs:
           
 
       - name: Generate JENKINS.env
+        shell: bash
         run: |
           echo "export BRANCH=$BRANCH " >> $JENKINS_ENV_PATH
           echo "export UTILS_DIR=$UTILS_DIR" >> $JENKINS_ENV_PATH
