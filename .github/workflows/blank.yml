@@ -4,6 +4,10 @@ name: CI
 
 # Controls when the workflow will run
 on:
+  # 每10分钟触发一次
+  schedule:
+    - cron: '*/10 * * * *'
+  
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
@@ -17,7 +21,7 @@ on:
 jobs:
   run-agent:
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 12
 
     steps:
       - name: Setup SSH
@@ -134,6 +138,7 @@ jobs:
 
       - name: build
         shell: bash
+        timeout-minutes: 9
         run: |
           pushd .
           cd ${UTILS_DIR}
@@ -141,7 +146,17 @@ jobs:
           popd 
           ls ${WORKSPACE}
           cd ${WORKSPACE}
-          ./main.exe
+          
+          # 使用 timeout 命令限制运行时间为 9 分钟（540秒）
+          timeout 540 ./main.exe || { 
+            exit_code=$?
+            if [ $exit_code -eq 124 ]; then
+              echo "Program timed out after 9 minutes (expected behavior)"
+              exit 0
+            else
+              exit $exit_code
+            fi
+          }
           
       # - name: Prepare workspace
       #   shell: pwsh
