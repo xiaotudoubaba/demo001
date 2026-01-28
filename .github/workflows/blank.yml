@@ -36,9 +36,11 @@ jobs:
           cat ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           ssh-keyscan gitee.com >> ~/.ssh/known_hosts
+        shell: bash
 
       - name: Get current branch name
         id: get_branch
+        shell: bash
         run: |
           echo "BRANCH=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
           echo "BRANCH_NAME=master" >> $GITHUB_ENV
@@ -66,6 +68,7 @@ jobs:
       #   # working-directory: ./${{ github.event.client_payload.project_name }}
         
       - name: git clone 
+        shell: bash
         run: |
           export UTILS_DIR=/tmp/myutils
           git clone git@gitee.com:charlesabc/myutils.git ${UTILS_DIR}
@@ -78,6 +81,7 @@ jobs:
 
 
       - name: Generate  env 
+        shell: bash
         run: |
           export UTILS_DIR=${PWD}/demo001/myutils
           echo "UTILS_DIR=${PWD}/demo001/myutils" >> $GITHUB_ENV
@@ -93,6 +97,7 @@ jobs:
       #     cache-dependency-path: frontend/package-lock.json
 
       - name: v_pn
+        shell: bash
         run: |
           pushd .
           cd ${UTILS_DIR}
@@ -101,6 +106,7 @@ jobs:
           bash ${WORKSPACE}/myutils/demo001/scripts/set_tunnel.sh ${JENKINS_ENV_PATH} || CheckLastResult
 
       - name: build
+        shell: bash
         run: |
           pushd .
           cd ${UTILS_DIR}
@@ -110,6 +116,7 @@ jobs:
           bash ${WORKSPACE}/myutils/demo001/scripts/clone_code.sh ${JENKINS_ENV_PATH} || CheckLastResult
 
       - name: build
+        shell: bash
         run: |
           pushd .
           cd ${UTILS_DIR}
