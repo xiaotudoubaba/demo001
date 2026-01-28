@@ -42,6 +42,7 @@ jobs:
         shell: bash
         run: |
           pip install dding
+          pip install certifi
           mkdir -p ~/.dding
           dding_secret="xx"
           dding_token="xx"
