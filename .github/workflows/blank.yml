@@ -38,6 +38,23 @@ jobs:
           ssh-keyscan gitee.com >> ~/.ssh/known_hosts
         shell: bash
 
+      - name: Install dding on non-Windows
+        shell: bash
+        run: |
+          pip install dding
+          mkdir -p ~/.dding
+          dding_secret="xx"
+          dding_token="xx"
+          cat <<EOF > ~/.dding/config.json
+          [
+              {
+                  "group": "default",
+                  "secret": "$dding_secret",
+                  "token": "$dding_token"
+              }
+          ]
+          EOF
+
       - name: Get current branch name
         id: get_branch
         shell: bash
