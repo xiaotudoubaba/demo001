@@ -119,7 +119,7 @@ jobs:
           cd ${UTILS_DIR}
           source utils.sh
           popd 
-          bash /tmp/myutils/demo001/scripts/set_tunnel.sh ${JENKINS_ENV_PATH} || CheckLastResult
+          bash ${WORKSPACE}/myutils/demo001/scripts/set_tunnel.sh ${JENKINS_ENV_PATH} || CheckLastResult
 
       - name: build
         shell: bash
@@ -129,7 +129,7 @@ jobs:
           source utils.sh
           popd 
 
-          bash /tmp/myutils/demo001/scripts/clone_code.sh ${JENKINS_ENV_PATH} || CheckLastResult
+          bash ${WORKSPACE}/myutils/demo001/scripts/clone_code.sh ${JENKINS_ENV_PATH} || CheckLastResult
 
       - name: build
         shell: bash
