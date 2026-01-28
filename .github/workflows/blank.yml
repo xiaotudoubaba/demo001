@@ -73,17 +73,17 @@ jobs:
       #     echo "ISDEBUG=${{github.event.client_payload.isdebug}}" >> $GITHUB_ENV
           
 
-      # - name: Generate JENKINS.env
-      #   run: |
-      #     echo "export BRANCH=$BRANCH " >> $JENKINS_ENV_PATH
-      #     echo "export UTILS_DIR=$UTILS_DIR" >> $JENKINS_ENV_PATH
-      #     echo "export WORK_ROOT_DIR=$WORK_ROOT_DIR" >> $JENKINS_ENV_PATH
-      #     if [ "$ISDEBUG" = "true" ]; then
-      #       echo "============ JENKINS.env Content ============"
-      #       cat $WORK_ROOT_DIR/.JENKINS.env
-      #       echo "============================================="
-      #     fi     
-      #   # working-directory: ./${{ github.event.client_payload.project_name }}
+      - name: Generate JENKINS.env
+        run: |
+          echo "export BRANCH=$BRANCH " >> $JENKINS_ENV_PATH
+          echo "export UTILS_DIR=$UTILS_DIR" >> $JENKINS_ENV_PATH
+          echo "export WORK_ROOT_DIR=$WORK_ROOT_DIR" >> $JENKINS_ENV_PATH
+          if [ "$ISDEBUG" = "true" ]; then
+            echo "============ JENKINS.env Content ============"
+            cat $WORK_ROOT_DIR/.JENKINS.env
+            echo "============================================="
+          fi     
+        # working-directory: demo001
         
       - name: git clone 
         shell: bash
