@@ -63,8 +63,8 @@ jobs:
           echo "BRANCH=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
           echo "BRANCH_NAME=master" >> $GITHUB_ENV
           echo "UTILS_DIR=/tmp/myutils" >> $GITHUB_ENV
-          echo "WORK_ROOT_DIR=${PWD}" >> $GITHUB_ENV
-          echo "WORKSPACE=${PWD}" >> $GITHUB_ENV
+          echo "WORK_ROOT_DIR=${PWD}/demo001" >> $GITHUB_ENV
+          echo "WORKSPACE=${PWD}/demo001" >> $GITHUB_ENV
           echo "JENKINS_ENV_PATH=/tmp/.JENKINS.env" >> $GITHUB_ENV
           echo "ISDEBUG=false" >> $GITHUB_ENV
           
