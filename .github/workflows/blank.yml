@@ -92,6 +92,7 @@ jobs:
           cd ${UTILS_DIR}
           source utils.sh
           popd 
+          echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
           bash /tmp/myutils/quickprint-sys/scripts/clone_code.sh ${JENKINS_ENV_PATH} || CheckLastResult
 
 
