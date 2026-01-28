@@ -97,6 +97,7 @@ jobs:
 
 
       - name: Generate  env 
+        shell: bash
         run: |
           export UTILS_DIR=${PWD}/demo001/myutils
           echo "UTILS_DIR=${PWD}/demo001/myutils" >> $GITHUB_ENV
