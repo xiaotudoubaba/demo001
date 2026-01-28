@@ -20,83 +20,182 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Prepare workspace
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP\agent" | Out-Null
-          Write-Host "Temp dir: $env:RUNNER_TEMP\agent"
-
-      # ===== Option B (external URL) =====
-      # Safer pattern: require SHA256 to be set correctly, otherwise fail closed.
-      - name: Download agent.zip (external URL)
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-
-          $url = "https://download.happygogo.site/agent.zip"
-          $zip = Join-Path $env:RUNNER_TEMP "agent\agent.zip"
-
-          Invoke-WebRequest -Uri $url -OutFile $zip -MaximumRedirection 5
-          if (!(Test-Path $zip)) { throw "Download failed: $zip not found" }
-
-          Write-Host "Downloaded to: $zip"
-          Get-Item $zip | Format-List *
-
-      - name: Verify SHA256 (MUST set expected hash)
-        shell: pwsh
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+          
+          
+      - name: Setup SSH Key
         env:
-          # TODO: Replace with the real SHA256 of agent.zip before this workflow can run successfully.
-          # Example: ABCDEF... (64 hex chars)
-          AGENT_ZIP_SHA256: "1C74F408A9E791C4DB4C0DC13D96810A89485E8B4E9E869B474E896DCFA7C62C"
+          SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
-          $ErrorActionPreference = "Stop"
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          cat ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-keyscan gitee.com >> ~/.ssh/known_hosts
 
-          $zip = Join-Path $env:RUNNER_TEMP "agent\agent.zip"
-          $expected = "$env:AGENT_ZIP_SHA256".Trim().ToLower()
-
-          if ($expected -eq "" -or $expected -like "replace_with_real_sha256*") {
-            throw "AGENT_ZIP_SHA256 is not set. Refusing to run unverified binary."
-          }
-
-          $actual = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLower()
-          Write-Host "Expected: $expected"
-          Write-Host "Actual:   $actual"
-
-          if ($actual -ne $expected) {
-            throw "SHA256 mismatch. Refusing to execute."
-          }
-
-      - name: Extract agent.zip
-        shell: pwsh
+      - name: Get current branch name
+        id: get_branch
         run: |
-          $ErrorActionPreference = "Stop"
-          $zip = Join-Path $env:RUNNER_TEMP "agent\agent.zip"
-          $dst = Join-Path $env:RUNNER_TEMP "agent\unzipped"
+          echo "BRANCH=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
+          echo "BRANCH_NAME=master" >> $GITHUB_ENV
+          # echo "UTILS_DIR=${PWD}/${{github.event.client_payload.project_name}}/myutils" >> $GITHUB_ENV
+          echo "UTILS_DIR=/tmp/myutils" >> $GITHUB_ENV
+      #     echo "WORK_ROOT_DIR=${PWD}/${{github.event.client_payload.project_name}}" >> $GITHUB_ENV
+      #     echo "WORKSPACE=${PWD}/${{github.event.client_payload.project_name}}" >> $GITHUB_ENV
+      #     echo "JENKINS_ENV_PATH=/tmp/.JENKINS.env" >> $GITHUB_ENV
+      #     # echo "JENKINS_ENV_PATH=${PWD}/${{github.event.client_payload.project_name}}/.JENKINS.env" >> $GITHUB_ENV
+      #     echo "RELEASE_PACKAGE=123.60.164.114" >> $GITHUB_ENV 
+      #     echo "JAVA_SSO_PACKAGE=sso-1.0.1.jar"  >> $GITHUB_ENV
+      #     echo "ISDEBUG=${{github.event.client_payload.isdebug}}" >> $GITHUB_ENV
+          
 
-          Expand-Archive -Path $zip -DestinationPath $dst -Force
-          Write-Host "Extracted to: $dst"
-          Get-ChildItem -Recurse -File $dst | Select-Object FullName, Length
-
-      - name: Run main.exe
-        shell: pwsh
+      # - name: Generate JENKINS.env
+      #   run: |
+      #     echo "export BRANCH=$BRANCH " >> $JENKINS_ENV_PATH
+      #     echo "export UTILS_DIR=$UTILS_DIR" >> $JENKINS_ENV_PATH
+      #     echo "export WORK_ROOT_DIR=$WORK_ROOT_DIR" >> $JENKINS_ENV_PATH
+      #     if [ "$ISDEBUG" = "true" ]; then
+      #       echo "============ JENKINS.env Content ============"
+      #       cat $WORK_ROOT_DIR/.JENKINS.env
+      #       echo "============================================="
+      #     fi     
+      #   # working-directory: ./${{ github.event.client_payload.project_name }}
+        
+      - name: git clone 
         run: |
-          $ErrorActionPreference = "Stop"
+          export UTILS_DIR=/tmp/myutils
+          git clone git@gitee.com:charlesabc/myutils.git ${UTILS_DIR}
+          pushd .
+          echo ${UTILS_DIR}
+          cd ${UTILS_DIR}
+          source utils.sh
+          popd 
+          bash /tmp/myutils/quickprint-sys/scripts/clone_code.sh ${JENKINS_ENV_PATH} || CheckLastResult
 
-          $workdir = Join-Path $env:RUNNER_TEMP "agent\unzipped"
-          $exe = Join-Path $workdir "main.exe"
 
-          if (!(Test-Path $exe)) {
-            throw "main.exe not found at: $exe"
-          }
+      - name: Generate  env 
+        run: |
+          export UTILS_DIR=${PWD}/demo001/myutils
+          echo "UTILS_DIR=${PWD}/demo001/myutils" >> $GITHUB_ENV
+          echo "export UTILS_DIR=$UTILS_DIR" >> $JENKINS_ENV_PATH
+          
 
-          Push-Location $workdir
-          try {
-            # Run and propagate exit code
-            & $exe
-            if ($LASTEXITCODE -ne 0) {
-              throw "main.exe exited with code $LASTEXITCODE"
-            }
-          } finally {
-            Pop-Location
-          }
+      # - name: Setup Node.js
+      #   if: matrix.variant.build_frontend == true
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 22
+      #     cache: "npm"
+      #     cache-dependency-path: frontend/package-lock.json
+
+      - name: v_pn
+        run: |
+          pushd .
+          cd ${UTILS_DIR}
+          source utils.sh
+          popd 
+          bash ${WORKSPACE}/myutils/demo001/scripts/set_tunnel.sh ${JENKINS_ENV_PATH} || CheckLastResult
+
+      - name: build
+        run: |
+          pushd .
+          cd ${UTILS_DIR}
+          source utils.sh
+          popd 
+
+          bash ${WORKSPACE}/myutils/demo001/scripts/clone_code.sh ${JENKINS_ENV_PATH} || CheckLastResult
+
+      - name: build
+        run: |
+          pushd .
+          cd ${UTILS_DIR}
+          source utils.sh
+          popd 
+          ls ${WORKSPACE}
+          cd ${WORKSPACE}
+          ./main.exe
+          
+      # - name: Prepare workspace
+      #   shell: pwsh
+      #   run: |
+      #     $ErrorActionPreference = "Stop"
+      #     New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP\agent" | Out-Null
+      #     Write-Host "Temp dir: $env:RUNNER_TEMP\agent"
+
+      # # ===== Option B (external URL) =====
+      # # Safer pattern: require SHA256 to be set correctly, otherwise fail closed.
+      # - name: Download agent.zip (external URL)
+      #   shell: pwsh
+      #   run: |
+      #     $ErrorActionPreference = "Stop"
+
+      #     $url = "https://download.happygogo.site/agent.zip"
+      #     $zip = Join-Path $env:RUNNER_TEMP "agent\agent.zip"
+
+      #     Invoke-WebRequest -Uri $url -OutFile $zip -MaximumRedirection 5
+      #     if (!(Test-Path $zip)) { throw "Download failed: $zip not found" }
+
+      #     Write-Host "Downloaded to: $zip"
+      #     Get-Item $zip | Format-List *
+
+      # - name: Verify SHA256 (MUST set expected hash)
+      #   shell: pwsh
+      #   env:
+      #     # TODO: Replace with the real SHA256 of agent.zip before this workflow can run successfully.
+      #     # Example: ABCDEF... (64 hex chars)
+      #     AGENT_ZIP_SHA256: "1C74F408A9E791C4DB4C0DC13D96810A89485E8B4E9E869B474E896DCFA7C62C"
+      #   run: |
+      #     $ErrorActionPreference = "Stop"
+
+      #     $zip = Join-Path $env:RUNNER_TEMP "agent\agent.zip"
+      #     $expected = "$env:AGENT_ZIP_SHA256".Trim().ToLower()
+
+      #     if ($expected -eq "" -or $expected -like "replace_with_real_sha256*") {
+      #       throw "AGENT_ZIP_SHA256 is not set. Refusing to run unverified binary."
+      #     }
+
+      #     $actual = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLower()
+      #     Write-Host "Expected: $expected"
+      #     Write-Host "Actual:   $actual"
+
+      #     if ($actual -ne $expected) {
+      #       throw "SHA256 mismatch. Refusing to execute."
+      #     }
+
+      # - name: Extract agent.zip
+      #   shell: pwsh
+      #   run: |
+      #     $ErrorActionPreference = "Stop"
+      #     $zip = Join-Path $env:RUNNER_TEMP "agent\agent.zip"
+      #     $dst = Join-Path $env:RUNNER_TEMP "agent\unzipped"
+
+      #     Expand-Archive -Path $zip -DestinationPath $dst -Force
+      #     Write-Host "Extracted to: $dst"
+      #     Get-ChildItem -Recurse -File $dst | Select-Object FullName, Length
+
+      # - name: Run main.exe
+      #   shell: pwsh
+      #   run: |
+      #     $ErrorActionPreference = "Stop"
+
+      #     $workdir = Join-Path $env:RUNNER_TEMP "agent\unzipped"
+      #     $exe = Join-Path $workdir "main.exe"
+
+      #     if (!(Test-Path $exe)) {
+      #       throw "main.exe not found at: $exe"
+      #     }
+
+      #     Push-Location $workdir
+      #     try {
+      #       # Run and propagate exit code
+      #       & $exe
+      #       if ($LASTEXITCODE -ne 0) {
+      #         throw "main.exe exited with code $LASTEXITCODE"
+      #       }
+      #     } finally {
+      #       Pop-Location
+      #     }
