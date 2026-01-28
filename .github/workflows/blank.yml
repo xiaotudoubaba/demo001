@@ -30,7 +30,7 @@ jobs:
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
-          mkdir -p ~/.ssh/
+          mkdir -p ~/.ssh/ 2>/dev/null || true
           echo "$SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           cat ~/.ssh/id_rsa
@@ -43,7 +43,7 @@ jobs:
         run: |
           pip install dding
           pip install certifi
-          mkdir -p ~/.dding
+          mkdir -p ~/.dding 2>/dev/null || true
           dding_secret="xx"
           dding_token="xx"
           cat <<EOF > ~/.dding/config.json
@@ -62,15 +62,11 @@ jobs:
         run: |
           echo "BRANCH=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
           echo "BRANCH_NAME=master" >> $GITHUB_ENV
-          # echo "UTILS_DIR=${PWD}/${{github.event.client_payload.project_name}}/myutils" >> $GITHUB_ENV
           echo "UTILS_DIR=/tmp/myutils" >> $GITHUB_ENV
-      #     echo "WORK_ROOT_DIR=${PWD}/${{github.event.client_payload.project_name}}" >> $GITHUB_ENV
-      #     echo "WORKSPACE=${PWD}/${{github.event.client_payload.project_name}}" >> $GITHUB_ENV
-      #     echo "JENKINS_ENV_PATH=/tmp/.JENKINS.env" >> $GITHUB_ENV
-      #     # echo "JENKINS_ENV_PATH=${PWD}/${{github.event.client_payload.project_name}}/.JENKINS.env" >> $GITHUB_ENV
-      #     echo "RELEASE_PACKAGE=123.60.164.114" >> $GITHUB_ENV 
-      #     echo "JAVA_SSO_PACKAGE=sso-1.0.1.jar"  >> $GITHUB_ENV
-      #     echo "ISDEBUG=${{github.event.client_payload.isdebug}}" >> $GITHUB_ENV
+          echo "WORK_ROOT_DIR=/tmp/work" >> $GITHUB_ENV
+          echo "WORKSPACE=/tmp/work" >> $GITHUB_ENV
+          echo "JENKINS_ENV_PATH=/tmp/.JENKINS.env" >> $GITHUB_ENV
+          echo "ISDEBUG=false" >> $GITHUB_ENV
           
 
       - name: Generate JENKINS.env
