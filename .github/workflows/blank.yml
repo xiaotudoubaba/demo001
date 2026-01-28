@@ -97,10 +97,9 @@ jobs:
 
 
       - name: Generate  env 
-        shell: bash
         run: |
-          export UTILS_DIR=${PWD}/myutils
-          echo "UTILS_DIR=${PWD}/myutils" >> $GITHUB_ENV
+          export UTILS_DIR=${PWD}/demo001/myutils
+          echo "UTILS_DIR=${PWD}/demo001/myutils" >> $GITHUB_ENV
           echo "export UTILS_DIR=$UTILS_DIR" >> $JENKINS_ENV_PATH
           
 
