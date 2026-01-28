@@ -80,7 +80,7 @@ jobs:
             cat $WORK_ROOT_DIR/.JENKINS.env
             echo "============================================="
           fi     
-        working-directory: demo001
+        # working-directory: demo001
         
       - name: git clone 
         shell: bash
