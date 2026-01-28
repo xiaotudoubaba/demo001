@@ -99,8 +99,8 @@ jobs:
       - name: Generate  env 
         shell: bash
         run: |
-          export UTILS_DIR=${PWD}/demo001/myutils
-          echo "UTILS_DIR=${PWD}/demo001/myutils" >> $GITHUB_ENV
+          export UTILS_DIR=${PWD}/myutils
+          echo "UTILS_DIR=${PWD}/myutils" >> $GITHUB_ENV
           echo "export UTILS_DIR=$UTILS_DIR" >> $JENKINS_ENV_PATH
           
 
@@ -119,6 +119,7 @@ jobs:
           cd ${UTILS_DIR}
           source utils.sh
           popd 
+          ls  ${WORKSPACE}
           bash ${WORKSPACE}/myutils/demo001/scripts/set_tunnel.sh ${JENKINS_ENV_PATH} || CheckLastResult
 
       - name: build
