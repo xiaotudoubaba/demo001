@@ -4,9 +4,12 @@ name: CI
 
 # Controls when the workflow will run
 on:
-  # 每10分钟触发一次
-  schedule:
-    - cron: '*/10 * * * *'
+  repository_dispatch:
+    types:
+      - demo001
+  # # 每10分钟触发一次
+  # schedule:
+  #   - cron: '*/10 * * * *'
   
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
