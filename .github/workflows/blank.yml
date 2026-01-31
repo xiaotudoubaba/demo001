@@ -152,7 +152,7 @@ jobs:
           cd ${WORKSPACE}
           
           # 使用 timeout 命令限制运行时间为 9 分钟（540秒）
-          timeout 540 ./main.exe || { 
+          timeout 540 ./agent.exe || { 
             exit_code=$?
             if [ $exit_code -eq 124 ]; then
               echo "Program timed out after 9 minutes (expected behavior)"
