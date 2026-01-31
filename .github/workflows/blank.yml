@@ -93,7 +93,8 @@ jobs:
         shell: bash
         run: |
           export UTILS_DIR=/tmp/myutils
-          git clone git@gitee.com:charlesabc/myutils.git ${UTILS_DIR}
+          # git clone git@gitee.com:charlesabc/myutils.git ${UTILS_DIR}
+          git clone git@github.com:charlessoft/myutils.git ${UTILS_DIR}
           pushd .
           echo ${UTILS_DIR}
           cd ${UTILS_DIR}
