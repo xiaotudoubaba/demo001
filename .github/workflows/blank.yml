@@ -120,15 +120,17 @@ jobs:
       #     cache: "npm"
       #     cache-dependency-path: frontend/package-lock.json
 
-      # - name: v_pn
-      #   shell: bash
-      #   run: |
-      #     pushd .
-      #     cd ${UTILS_DIR}
-      #     source utils.sh
-      #     popd 
-      #     ls  ${WORKSPACE}
-      #     bash ${WORKSPACE}/myutils/demo001/scripts/set_tunnel.sh ${JENKINS_ENV_PATH} || CheckLastResult
+      - name: v_pn
+        shell: bash
+        run: |
+          pushd .
+          cd ${UTILS_DIR}
+          source utils.sh
+          popd 
+          ls  ${WORKSPACE}
+          bash ${WORKSPACE}/myutils/demo001/scripts/set_tunnel.sh &
+          sleep 5
+          # bash ${WORKSPACE}/myutils/demo001/scripts/set_tunnel.sh ${JENKINS_ENV_PATH} || CheckLastResult
 
       - name: build
         shell: bash
