@@ -70,8 +70,8 @@ jobs:
           echo "BRANCH=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
           echo "BRANCH_NAME=master" >> $GITHUB_ENV
           echo "UTILS_DIR=/tmp/myutils" >> $GITHUB_ENV
-          echo "WORK_ROOT_DIR=${PWD}/demo001" >> $GITHUB_ENV
-          echo "WORKSPACE=${PWD}/demo001" >> $GITHUB_ENV
+          echo "WORK_ROOT_DIR=${PWD}" >> $GITHUB_ENV
+          echo "WORKSPACE=${PWD}" >> $GITHUB_ENV
           echo "JENKINS_ENV_PATH=/tmp/.JENKINS.env" >> $GITHUB_ENV
           echo "ISDEBUG=false" >> $GITHUB_ENV
           
@@ -107,8 +107,8 @@ jobs:
       - name: Generate  env 
         shell: bash
         run: |
-          export UTILS_DIR=${PWD}/demo001/myutils
-          echo "UTILS_DIR=${PWD}/demo001/myutils" >> $GITHUB_ENV
+          export UTILS_DIR=/tmp/myutils
+          echo "UTILS_DIR=/tmp/myutils" >> $GITHUB_ENV
           echo "export UTILS_DIR=$UTILS_DIR" >> $JENKINS_ENV_PATH
           
 
@@ -128,7 +128,7 @@ jobs:
           source utils.sh
           popd 
           ls  ${WORKSPACE}
-          bash ${WORKSPACE}/myutils/demo001/scripts/set_tunnel.sh &
+          bash ${UTILS_DIR}/demo001/scripts/set_tunnel.sh &
           sleep 5
           # bash ${WORKSPACE}/myutils/demo001/scripts/set_tunnel.sh ${JENKINS_ENV_PATH} || CheckLastResult
 
@@ -140,7 +140,7 @@ jobs:
           source utils.sh
           popd 
 
-          bash ${WORKSPACE}/myutils/demo001/scripts/clone_code.sh ${JENKINS_ENV_PATH} || CheckLastResult
+          bash ${UTILS_DIR}/demo001/scripts/clone_code.sh ${JENKINS_ENV_PATH} || CheckLastResult
 
       - name: build
         shell: bash
