@@ -149,12 +149,33 @@ jobs:
           pushd .
           cd ${UTILS_DIR}
           source utils.sh
-          popd 
-          ls ${WORKSPACE}
+          popd
+
+          echo "========当前目录========"
+          pwd
+          echo "========WORKSPACE 内容========"
+          ls -la ${WORKSPACE}
+          echo "========查找 agent.exe========"
+          find ${WORKSPACE} -name "agent.exe" -type f
+
           cd ${WORKSPACE}
-          
+
+          # 检查 agent.exe 是否存在
+          if [ ! -f "./agent.exe" ]; then
+            echo "错误: agent.exe 不在当前目录"
+            echo "尝试查找 agent.exe 位置..."
+            AGENT_PATH=$(find ${WORKSPACE} -name "agent.exe" -type f | head -n 1)
+            if [ -z "$AGENT_PATH" ]; then
+              echo "错误: 在 WORKSPACE 中找不到 agent.exe"
+              exit 1
+            fi
+            echo "找到 agent.exe: $AGENT_PATH"
+            cd $(dirname "$AGENT_PATH")
+            echo "切换到目录: $(pwd)"
+          fi
+
           # 使用 timeout 命令限制运行时间为 9 分钟（540秒）
-          timeout 540 ./agent.exe || { 
+          timeout 540 ./agent.exe || {
             exit_code=$?
             if [ $exit_code -eq 124 ]; then
               echo "Program timed out after 9 minutes (expected behavior)"
